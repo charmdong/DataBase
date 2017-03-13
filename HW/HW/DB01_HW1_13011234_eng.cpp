@@ -35,7 +35,7 @@ int main()
 |	기능 :	 1.전체적인 프로그램의 메뉴를 출력
 |			 2.메뉴 번호 입력 받기
 |			 3.메뉴 번호에 해당하는 함수 실행
-\*-------------------------------------------------------------------------------*/
+\*-----------------------------------------------------------------------*/
 void viewMenu(char *file, Student *ary,int *cnt)
 {
 	FILE *fp;	
@@ -114,7 +114,7 @@ void viewMenu(char *file, Student *ary,int *cnt)
 /*--------------------------<<<inputFile 함수>>>--------------------------*\
 |	전달 인자 : 열고자 하는 파일명을 저장할 문자열
 |	기능 :	 1.열고자 하는 파일명(확장자 포함) 입력 받기
-\*-----------------------------------------------------------------------------*/
+\*------------------------------------------------------------------------*/
 void inputFile(char* fname)	
 {
 	printf("\nSelcet File\n");
@@ -134,7 +134,7 @@ void inputFile(char* fname)
 |	전달 인자 :	데이터를 받아올 파일명, 정보를 저장할 구조체 배열, 
 |					저장된 데이터 갯수
 |	기능 :	 1.텍스트 파일 내의 데이터를 구조체 배열에 저장
-\*-------------------------------------------------------------------------*/
+\*-------------------------------------------------------------------*/
 void load(FILE *fp, Student *ary, int *cnt)
 {
 	*cnt = 0;	// reset the count of stored data to Zero
@@ -155,7 +155,7 @@ void load(FILE *fp, Student *ary, int *cnt)
 |	전달 인자 : 데이터를 추가할 파일명, 구조체 배열, 저장된 데이터 갯수
 |	기능 :	 1.새로운 정보 입력 받기
 |			 2.파일과 구조체 배열에 모두 저장
-\*--------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------*/
 void insert(FILE *fp, Student *ary, int *cnt)	
 {
 	char studentInfo[MAX];	// Character array which is stored new data
@@ -179,7 +179,7 @@ void insert(FILE *fp, Student *ary, int *cnt)
 |	전달 인자 : 데이터가 저장되어 있는 구조체 배열, 저장된 데이터 갯수
 |	기능 :	 1.찾고자 하는 학번, 이름, 학년, 학점 중 택 1 입력 받기
 |			 2.해당하는 학번, 이름, 학년, 학점에 대한 데이터 출력
-\*---------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------*/
 void search(Student *ary, int *cnt)	
 {
 	int i;
@@ -246,20 +246,20 @@ void search(Student *ary, int *cnt)
 |	기능 :	 1.수정하고자 하는 학번 입력 받기
 |			 2.입력 받은 학번의 수정하고자 하는 부분에 대한 선택 입력 받기
 |			 3.입력 받은 메뉴 번호에 해당하는 부분 수정
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------*/
 void update(FILE* fp,Student *ary, int *cnt)
 {
-	char updateNum[10];		// 수정하고자 하는 학번 입력받을 문자열
-	char change[20];			// 변경하려는 정보 입력받을 문자열
-	int choice;						// 메뉴 선택 받을 변수
-	int index;						// 구조체 배열 내에서 수정하고자 하는 데이터가 존재하는 위치의 인덱스를 저장할 변수
+	char updateNum[10];		// Variable of character string that inputed student number by user to update
+	char change[20];		// Variable of character string that inputed by user to change the data
+	int choice;				// Type of integer variable to select menu
+	int index;				// The location of the data in structure array that user want to change 
 	int i;	
 
 	printf("\nInput the Student Number to Update : ");
 	scanf("%s", updateNum);
-	if ((index = checkLoca(ary, cnt, updateNum)) == -1) {		// checkLoca 함수의 반환값이 -1인 경우 입력받은 학번에 대한 정보가 없음을 출력
+	if ((index = checkLoca(ary, cnt, updateNum)) == -1) {		// If function of checkLoca's return value is -1, the program will print error
 		printf("\n<No Information about the SN>\n");
-		for (i = 0; i < *cnt; i++)		// fopen의 옵션을 w+로 설정하였기때문에, 파일이 열리는 순간 모든 정보가 지워지므로, 구조체 배열에 백업된 데이터를 파일에 재작성
+		for (i = 0; i < *cnt; i++)		// The function of fopen's option is 'w+'. So, the program has to backup the data in .txt file
 			fprintf(fp, "%s %s %s %s\n", ary[i].stuNum, ary[i].name, ary[i].year, ary[i].grade);
 		return;
 	}
@@ -267,14 +267,14 @@ void update(FILE* fp,Student *ary, int *cnt)
 	printf("\n1.NO\n2.Name\n3.Year\n4.Grade\n");
 	
 	printf("SELECT : ");
-	while (!scanf("%d",&choice))	// 문자 입력시 반복문
+	while (!scanf("%d",&choice))	// When user inputs character variable, then the program will require the correct number
 	{
 		printf("Wrong Selection !\n");
 		myflush();
 		printf("SELECT : ");
 	}
 
-	switch (choice)	// 학번, 이름, 학년, 학점 중 해당하는 부분을 변경
+	switch (choice)
 	{
 	case 1:	printf("Input New NO of the student : ");
 				scanf("%s", change);
@@ -295,7 +295,7 @@ void update(FILE* fp,Student *ary, int *cnt)
 	default: printf("\nWrong Selection !\n"); break;
 	}
 	
-	for (i = 0; i < *cnt; i++)		// 파일에 덮어쓰기
+	for (i = 0; i < *cnt; i++)		// Write all data after changing
 		fprintf(fp, "%s %s %s %s\n", ary[i].stuNum, ary[i].name, ary[i].year, ary[i].grade);
 
 	return;
@@ -305,23 +305,23 @@ void update(FILE* fp,Student *ary, int *cnt)
 |	전달 인자 : 데이터를 삭제할 파일명, 구조체 배열, 저장된 데이터 갯수
 |	기능 :	 1.삭제하고자 하는 학번 입력 받기
 |			 2.입력 받은 학번에 대한 데이터 삭제
-\*---------------------------------------------------------------------------*/
+\*----------------------------------------------------------------------*/
 void del(FILE *fp, Student *ary, int *cnt)
 {
-	char del[10];	// 삭제하고자 하는 학번 입력 받을 문자열
-	int index;		// 구조체 내에서 삭제하고자 하는 데이터가 위치하는 인덱스 값을 저장할 변수
+	char del[10];	// Variable of character array that will store the student number to delete
+	int index;		// Type of integer variable to store the location of data to delete in array of structures
 	int i;
 
 	printf("\nInput the Student Number to Delete : ");
 	scanf("%s", del);
-	if ((index = checkLoca(ary, cnt, del)) == -1) {			// checkLoca 함수의 반환값이 -1인 경우 입력받은 학번에 대한 정보가 없음을 출력
+	if ((index = checkLoca(ary, cnt, del)) == -1) {			// If function of checkLoca's return value is -1, the program will print error
 		printf("\n<No Information of the SN>\n");
-		for (i = 0; i < *cnt; i++)		// fopen의 옵션을 w+로 설정하였기때문에, 파일이 열리는 순간 모든 정보가 지워지므로, 구조체 배열에 백업된 데이터를 파일에 재작성
+		for (i = 0; i < *cnt; i++)		// The function of fopen's option is 'w+'. So, the program has to backup the data in .txt file
 			fprintf(fp, "%s %s %s %s\n", ary[i].stuNum, ary[i].name, ary[i].year, ary[i].grade);
 		return;
 	}
 
-	for (i = index; i < *cnt; i++)
+	for (i = index; i < *cnt; i++)	// If there are the data to delete in array of structures, all data's index behind the data to delete will be changed 
 		ary[i] = ary[i + 1];
 	(*cnt)--;
 
@@ -336,22 +336,22 @@ void del(FILE *fp, Student *ary, int *cnt)
 |					찾고자 하는 데이터 문자열
 |	기능 :	 1.찾고자 하는 데이터의 위치 파악
 |	반환 값 : 찾고자 하는 데이터가 존재하는 구조체 배열의 인덱스 값
-\*-------------------------------------------------------------------------------*/
+\*------------------------------------------------------------------------*/
 int checkLoca(Student *ary,int *cnt,char *str)
 {
 	int i;
-	for (i = 0; i < *cnt; i++)		// 구조체 배열을 통해 찾고자 하는 데이터가 존재하는 위치 탐색
+	for (i = 0; i < *cnt; i++)		// Search the location of data to find in structured array 
 		if (!strcmp(str, ary[i].stuNum))
 			return i;
 
-	return -1;	// 찾고자 하는 데이터가 존재하지 않으면 -1 반환
+	return -1;	// If there are no data to find, it will return -1 value
 }
 
 /*--------------------------<<<print 함수>>>--------------------------*\
 |	전달 인자 : 데이터가 저장되어 있는 구조체 배열, 저장된 데이터 갯수
 |	기능 :	 1.텍스트 파일의 데이터들이 저장되어 있는 구조체 배열을 통해
 |				텍스트 파일의 데이터 출력
-\*-------------------------------------------------------------------------*/
+\*--------------------------------------------------------------------*/
 void print(Student *ary, int *cnt)
 {
 	int i;
@@ -370,7 +370,7 @@ void print(Student *ary, int *cnt)
 /*--------------------------<<<myflush 함수>>>--------------------------*\
 |	전달 인자 : X
 |	기능 :	 1.입력 버퍼를 비워주는 함수
-\*-----------------------------------------------------------------------------*/
+\*----------------------------------------------------------------------*/
 void myflush()
 {
 	while (getchar() != '\n') { ; }

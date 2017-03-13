@@ -163,7 +163,7 @@ void insert(FILE *fp, Student *ary, int *cnt)
 	printf("\nInput New Infor : ");
 	// 입력 받은 데이터가 완전한 경우 저장된 데이터 갯수 증가 및 텍스트 파일에 저장
 	if (scanf("%s %s %s %s", ary[*cnt].stuNum, ary[*cnt].name, ary[*cnt].year, ary[*cnt].grade) == 4 && getchar() == '\n') {
-		fprintf(fp, "%s %s %s %s", ary[*cnt].stuNum, ary[*cnt].name, ary[*cnt].year, ary[*cnt].grade);
+		fprintf(fp, "%s %s %s %s\n", ary[*cnt].stuNum, ary[*cnt].name, ary[*cnt].year, ary[*cnt].grade);
 		(*cnt)++;
 	}
 	// 입력 받은 데이터가 완전하지 못한 경우, 오류문 출력 이후 입력 버퍼 비우기
@@ -194,7 +194,7 @@ void search(Student *ary, int *cnt)
 		printf("  >>  ");
 	}
 
-	printf("Input to Search : ");
+	printf("\nInput to Search : ");
 	scanf("%s", search);
 	printf("\n");
 	
@@ -276,19 +276,19 @@ void update(FILE* fp,Student *ary, int *cnt)
 
 	switch (choice)	// 학번, 이름, 학년, 학점 중 해당하는 부분을 변경
 	{
-	case 1:	printf("Input New NO of the student : ");
+	case 1:	printf("\nInput New NO of the student : ");
 				scanf("%s", change);
 				strcpy(ary[index].stuNum, change);
 				break;
-	case 2:	printf("Input New Name of the student : ");
+	case 2:	printf("\nInput New Name of the student : ");
 				scanf("%s", change);
 				strcpy(ary[index].name, change);
 				break;
-	case 3:	printf("Input New Year of the student : ");
+	case 3:	printf("\nInput New Year of the student : ");
 				scanf("%s", change);
 				strcpy(ary[index].year, change);
 				break;
-	case 4:	printf("Input New Grade of the student : ");
+	case 4:	printf("\nInput New Grade of the student : ");
 				scanf("%s", change);
 				strcpy(ary[index].grade, change);
 				break;
