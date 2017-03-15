@@ -21,6 +21,11 @@ int checkLoca(Student *, int *, char *);
 void load(FILE *, Student *, int *);
 void print(Student *,int *);
 void myflush();
+int checkID(Student *,int *, char *);
+int checkName(char *);
+int checkYear(char *);
+int checkGrade(char *);
+void sortAry(Student *, int *);
 
 int main()
 {
@@ -67,6 +72,8 @@ void viewMenu(char *file, Student *ary,int *cnt)
 						else {
 							load(fp, ary, cnt);
 							print(ary, cnt);
+							//sortAry(ary, cnt);
+							//print(ary, cnt);
 							fclose(fp);
 						}
 						break;
@@ -159,19 +166,49 @@ void load(FILE *fp, Student *ary, int *cnt)
 void insert(FILE *fp, Student *ary, int *cnt)	
 {
 	char studentInfo[MAX];	// Character array which is stored new data
+	int checkId;
 
-	printf("\nInput New Infor : ");
-	// If new data that inputed is perfect, it stored in the .txt file which is opened and count of stored data is counted up.  
-	if (scanf("%s %s %s %s", ary[*cnt].stuNum, ary[*cnt].name, ary[*cnt].year, ary[*cnt].grade) == 4 && getchar() == '\n') {
-		fprintf(fp, "%s %s %s %s\n", ary[*cnt].stuNum, ary[*cnt].name, ary[*cnt].year, ary[*cnt].grade);
-		(*cnt)++;
-	}
-	// If new data isn't perfect, the program print error and erase buffer of input.
-	else {
+	printf("Input Student ID : ");
+	scanf("%s", ary[*cnt].stuNum);
+	checkId = checkID(ary, cnt, ary[*cnt].stuNum);
+	
+	if (checkId ==0) {
 		printf("\nWrong Input !\n");
 		myflush();
+		return;
 	}
-	
+	else if (checkId == -1) {
+		printf("\nIt already exist !\n");
+		myflush();
+		return;
+	}
+
+	printf("Input Student Name : ");
+	scanf("%s", ary[*cnt].name);
+	if (!checkName(ary[*cnt].name)) {
+		printf("\nWrong Input !\n");
+		myflush();
+		return;
+	}
+
+	printf("Input Student Year : ");
+	scanf("%s", ary[*cnt].year);
+	if (!checkYear(ary[*cnt].year)) {
+		printf("\nWrong Input !\n");
+		myflush();
+		return;
+	}
+
+	printf("Input Student Grade : ");
+	scanf("%s", ary[*cnt].grade);
+	if (!checkGrade(ary[*cnt].grade)) {
+		printf("\nWrong Input !\n");
+		myflush();
+		return;
+	}
+
+	fprintf(fp, "%s %s %s %s\n", ary[*cnt].stuNum, ary[*cnt].name, ary[*cnt].year, ary[*cnt].grade);
+	(*cnt)++;
 	return;
 }
 
@@ -374,4 +411,88 @@ void print(Student *ary, int *cnt)
 void myflush()
 {
 	while (getchar() != '\n') { ; }
+}
+
+int checkID(Student *ary,int *cnt, char *str)
+{
+	int i;
+	int len = strlen(str);
+	int res=1;
+
+	for (i = 0; i < len; i++) {
+		if (str[i]<'0' || str[i]>'9') {
+			res = 0;
+			break;
+		}
+	}
+
+	for (i = 0; i < *cnt; i++) {
+		if (!strcmp(str, ary[i].stuNum)) {
+			res = -1;
+			break;
+		}
+	}
+
+	return res;
+}
+
+int checkName(char *name)
+{
+	int res = 1;
+	int i;
+
+	for (i = 0; i < strlen(name); i++) {
+		if (name[i] >= '0' && name[i] <= '9')
+			res = 0;
+	}
+
+	return res;
+}
+
+int checkYear(char *year)
+{
+	int res = 1;
+	int i;
+
+	for (i = 0; i < strlen(year); i++) {	// 소문자로 만들기
+		if (year[i] >= 'A' && year[i] <= 'Z')
+			year[i] += 32;
+	}
+
+	if (strcmp(year, "freshman") != 0 && strcmp(year, "sophomore") != 0 && strcmp(year, "junior") != 0 && strcmp(year, "senior") != 0)
+		res = 0;
+
+	year[0] -= 32;	// 첫자리만 대문자로 만들기
+
+	return res;
+}
+
+int checkGrade(char *grade)
+{
+	int res = 1;
+
+	if (grade[0]<'A' || grade[0]>'D' && grade[0] != 'F')
+		res = 0;
+	if (res==1 && grade[1] != '+' && grade[1] != '-' &&grade[1] != '\0')
+		res = 0;
+
+	return res;
+}
+
+void sortAry(Student *ary, int *cnt)
+{
+	int i,j;
+	Student tmp;
+
+	for (i = 0; i < *cnt - 1; i++) {
+		for (j = i; j < *cnt; j++) {
+			if (strcmp(ary[i].stuNum, ary[j].stuNum) > 0) {
+				tmp = ary[i];
+				ary[i] = ary[j];
+				ary[j] = tmp;
+			}
+		}
+	}
+
+	return;
 }
