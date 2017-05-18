@@ -12,14 +12,14 @@ bool DBConnect();
 void DBDisconnect();
 void menu();
 void selectMenu();
-void selectMenuQuery();
+void selectMenuSql();
 void selectOutput(SQLCHAR *);
 void queryOutput(SQLCHAR *);
 void schemaMenu();
 void showSchema(SQLCHAR *);
-void insertMenu();
-void updateMenu();
-void deleteMenu();
+void insertSenario();
+void updateSenario();
+void deleteSenario();
 int qOrs();
 void getQuery(SQLCHAR *);
 
@@ -33,14 +33,7 @@ int main(int argc, char *agrv[])
 		menu();
 		DBDisconnect();
 	}
-	/*int len;
-	SQLCHAR query[MAX_QUERY];
-	printf("Input the Query : ");
-	fgets((char*)query, MAX_QUERY + 1, stdin);
-	len = strlen((char*)query);
-	query[len - 1] = '\0';
-	selectOutput(query);
-	*/
+
 	return 0;
 }
 
@@ -79,21 +72,23 @@ void menu()
 		printf("\t<MENU>\n1.Show Schema\n2.SELECT\n3.INSERT\n4.UPDATE\n5.DELETE\n6.EXIT\n");
 		printf("Select : ");
 		scanf("%d", &menuNum);
-		
+
 		switch (menuNum) {
 		case 1: schemaMenu(); break;
 		case 2: 
 			if (qOrs() == 1)
-				selectMenuQuery();
+				selectMenuSql();
 			else
 				selectMenu(); break;
 		case 3: 
 			if (qOrs() == 1) {
-				printf("\n1.test\n2.test\n3.test\nInput the Query : ");
+				printf("\n1.CONSUMER (ID,DELIVERNO,SELLERNO,ADDR)\n2.MANAGER (MNGNO,NICK,WORKTIME)\n3.DELIVERER (DELNO,NAME,COMPANY,FARMNO)\n");
+				printf("4.PRODUCT (TYPENO,FANO,PRICE$)\n5.FARM (FARMNO,NAME)\n6.INFO (MNO,FANO,ADDR,PDTTYPE)\nInput the SQL : ");
 				getchar();
 				getQuery(query);
 				queryOutput(query);
 			}
+			else{}
 			break;
 		case 4: 
 			if (qOrs() == 1) {
@@ -102,6 +97,7 @@ void menu()
 				getQuery(query);
 				queryOutput(query);
 			}
+			else{}
 			break;
 		case 5: 
 			if (qOrs() == 1) {
@@ -110,6 +106,7 @@ void menu()
 				getQuery(query);
 				queryOutput(query);
 			}
+			else{}
 			break;
 		case 6: printf("\n<Exit the Database>\n\n");  break;
 		}
@@ -166,7 +163,7 @@ void selectMenu()	// 시나리오 기반의 select
 	}
 }
 
-void selectMenuQuery()
+void selectMenuSql()
 {
 	int len;
 	static SQLCHAR query[MAX_QUERY];
@@ -176,9 +173,7 @@ void selectMenuQuery()
 	getchar();
 
 	printf("Input the SQL query : ");
-	fgets((char*)query, MAX_QUERY + 1, stdin);
-	len = strlen((char*)query);
-	query[len - 1] = '\0';
+	getQuery(query);
 	selectOutput(query);
 }
 
@@ -280,6 +275,61 @@ void showSchema(SQLCHAR *query)
 			SQLCloseCursor(hStmt);
 			SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
 		}
+}
+
+void insertSenario()
+{
+	int choice;
+	char tupleStr[6][BUFF_SIZE];	// 삽입할 튜플의 값들
+	int tupleInt[3];
+	SQLCHAR query[MAX_QUERY];
+
+	printf("1.a\n2.b\n3.c\n4.d\n5.e\nSelect : ");
+	scanf("%d", &choice);
+	getchar();
+
+	switch (choice) {
+	case 1:
+		scanf("%s", tupleStr[0]);
+		sprintf((char*)query, "INSERT INTO %s VALUES ();", tupleStr[0]);
+		queryOutput(query);
+		break;
+	case 2:break;
+	case 3:break;
+	case 4:break;
+	case 5:break;
+	}
+}
+
+void deleteSenario()
+{
+	int choice;
+	printf("1.a\n2.b\n3.c\n4.d\n5.e\nSelect : ");
+	scanf("%d", &choice);
+	getchar();
+
+	switch (choice) {
+	case 1:break;
+	case 2:break;
+	case 3:break;
+	case 4:break;
+	case 5:break;
+	}
+}
+
+void updateSenario()
+{
+	int choice;
+	printf("1.a\n2.b\n3.c\n4.d\n5.e\nSelect : ");
+	scanf("%d", &choice);
+
+	switch (choice) {
+	case 1:break;
+	case 2: break;
+	case 3:break;
+	case 4:break;
+	case 5: break;
+	}
 }
 
 void getQuery(SQLCHAR *query)
