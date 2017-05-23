@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #define BUFF_SIZE 30
-#define MAX_QUERY 200
+#define MAX_QUERY 300
 #pragma warning(disable : 4996)
 
 bool DBConnect();
@@ -37,6 +37,8 @@ int main(int argc, char *agrv[])
 	return 0;
 }
 
+//---------------------------------------------------------DB 연결 관련 함수-----------------------------------------------------------//
+
 bool DBConnect()
 {
 	SQLRETURN Ret;
@@ -64,6 +66,8 @@ void DBDisconnect()
 	SQLFreeHandle(SQL_HANDLE_ENV, hEnv);// Free the Environment Handle
 }
 
+//---------------------기본 메뉴 함수---------------------//
+
 void menu()
 {
 	int menuNum;
@@ -75,38 +79,39 @@ void menu()
 
 		switch (menuNum) {
 		case 1: schemaMenu(); break;
-		case 2: 
+		case 2:
 			if (qOrs() == 1)
 				selectMenuSql();
 			else
 				selectMenu(); break;
-		case 3: 
+		case 3:
 			if (qOrs() == 1) {
 				printf("\n1.CONSUMER (ID,DELIVERNO,SELLERNO,ADDR)\n2.MANAGER (MNGNO,NICK,WORKTIME)\n3.DELIVERER (DELNO,NAME,COMPANY,FARMNO)\n");
-				printf("4.PRODUCT (TYPENO,FANO,PRICE$)\n5.FARM (FARMNO,NAME)\n6.INFO (MNO,FANO,ADDR,PDTTYPE)\nInput the SQL : ");
+				printf("4.PRODUCT (TYPENO,FANO,PRICE$)\n5.FARM (FARMNO,NAME)\n6.INFO (MNO,FANO,ADDR,PDTTYPE)\n\nInput the SQL >> ");
 				getchar();
 				getQuery(query);
 				queryOutput(query);
 			}
-			else{}
+			else
+				insertSenario();
 			break;
-		case 4: 
+		case 4:
+			if (qOrs() == 1) {
+				printf("\n1.CONSUMER\n2.MANAGER\n3.DELIVERER\n4.\n5.\nInput the Query >> ");
+				getchar();
+				getQuery(query);
+				queryOutput(query);
+			}
+			else {}
+			break;
+		case 5:
 			if (qOrs() == 1) {
 				printf("\n1.test\n2.test\n3.test\nInput the Query : ");
 				getchar();
 				getQuery(query);
 				queryOutput(query);
 			}
-			else{}
-			break;
-		case 5: 
-			if (qOrs() == 1) {
-				printf("\n1.test\n2.test\n3.test\nInput the Query : ");
-				getchar();
-				getQuery(query);
-				queryOutput(query);
-			}
-			else{}
+			else {}
 			break;
 		case 6: printf("\n<Exit the Database>\n\n");  break;
 		}
@@ -115,7 +120,9 @@ void menu()
 	}
 }
 
-int qOrs()	// SQL , 시나리오 기반 선택
+//---------------------SQL, 시나리오 기반 선택 함수---------------------//
+
+int qOrs()
 {
 	int num;
 	while (1) {
@@ -125,108 +132,24 @@ int qOrs()	// SQL , 시나리오 기반 선택
 		if (num == 1 || num == 2)
 			break;
 		else
-			printf("Wrong selection !\n");
+			printf("\n# Wrong selection ! #\n");
 	}
 	return num;
 }
 
-void selectMenu()	// 시나리오 기반의 select
-{
-	int num;
-	char input[25];
-	static SQLCHAR query[MAX_QUERY];
-	printf("-----------------------------------------------------------\n");
-	printf("1.CONSUMER\n2.MANAGER\n3.DELIVERER\n4.CONSUMER AND INFO\n5.CONSUMER, DELIVERER, AND FARM\n");
-	printf("-----------------------------------------------------------\n");
-	printf("Select : ");
-	scanf("%d", &num);
-	getchar();
+//---------------------SQL 질의문 parsing 함수---------------------//
 
-	switch (num) {
-	case 1: printf("Input the Consumer ID : ");
-		scanf("%s",input); 
-		sprintf((char*)query,"SELECT * FROM CONSUMER WHERE ID = '%s'",input); 
-		printf("--------------------------------------------------------\nID\t\tDELIVERNO  SELLERNO    ADDR\n");
-		selectOutput(query);
-			break;
-	case 2: printf("Input the Manager No : ");
-		scanf("%s", input);
-		sprintf((char*)query, "SELECT * FROM MANAGER WHERE MNGNO = '%s'", input);
-		printf("--------------------------------------------------------\nMNGNO\tNICK\t\tWORKTIME\n");
-		selectOutput(query);
-			break;
-	case 3: break;
-	case 4: break;
-	case 5: break;
-	case 6: break;
-	case 7: break;
-	}
-}
-
-void selectMenuSql()
+void getQuery(SQLCHAR *query) // SQL 질의문 parsing 함수
 {
 	int len;
-	static SQLCHAR query[MAX_QUERY];
-	printf("-----------------------------------------------------------\n");
-	printf("1.CONSUMER\n2.MANAGER\n3.DELIVERER\n4.CONSUMER AND INFO\n5.CONSUMER, DELIVERER, AND FARM\n");
-	printf("-----------------------------------------------------------\n");
-	getchar();
-
-	printf("Input the SQL query : ");
-	getQuery(query);
-	selectOutput(query);
+	fgets((char*)query, MAX_QUERY + 1, stdin);
+	len = strlen((char*)query);
+	query[len - 1] = '\0';
 }
 
-void selectOutput(SQLCHAR* query)
-{
-		SQLHSTMT hStmt;
-		SQLSMALLINT colCnt = 0;
-		int len;
-		int i;
+//---------------------스키마 관련 함수들---------------------//
 
-		if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
-		{
-			SQLExecDirect(hStmt, query, SQL_NTS);
-			SQLNumResultCols(hStmt, &colCnt);
-
-			SQLCHAR **data;
-			data = (SQLCHAR **)malloc(sizeof(SQLCHAR *)*colCnt);
-			for (i = 0; i < colCnt; i++)
-				data[i] = (SQLCHAR *)malloc(sizeof(SQLCHAR) * BUFF_SIZE);
-
-			for (i = 0; i < colCnt; i++)
-				SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, NULL);
-
-			while (SQLFetch(hStmt) != SQL_NO_DATA) {
-				for (i = 0; i < colCnt; i++)
-					printf("%s\t", data[i]);
-				printf("\n");
-			}
-			printf("\n");
-			//printf("--------------------------------------------------------\n");
-			SQLCloseCursor(hStmt);
-			SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
-		}
-}
-
-void queryOutput(SQLCHAR* query)	// insert, update, delete
-{
-		SQLHSTMT hStmt;
-		SQLSMALLINT colCnt = 0;
-		int len;
-		int i;
-
-		if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
-		{
-			SQLExecDirect(hStmt, query, SQL_NTS);
-			SQLNumResultCols(hStmt, &colCnt);
-
-			SQLCloseCursor(hStmt);
-			SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
-		}
-}
-
-void schemaMenu()
+void schemaMenu() // 스키마 메뉴 함수
 {
 	SQLCHAR query[MAX_QUERY];
 	char value[6][20] = { "CONSUMER","MANAGER","DELIVERER","PRODUCT","FARM","INFO" };
@@ -245,36 +168,194 @@ void schemaMenu()
 	}
 }
 
-void showSchema(SQLCHAR *query)
+void showSchema(SQLCHAR *query) // 모든 스키마를 출력해주는 함수
 {
-		SQLHSTMT hStmt;
-		SQLSMALLINT colCnt = 0;
-		int len;
-		int i;
+	SQLHSTMT hStmt;
+	SQLSMALLINT colCnt = 0;
+	int len;
+	int i;
 
-		if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
-		{
-			SQLExecDirect(hStmt, query, SQL_NTS);
-			SQLNumResultCols(hStmt, &colCnt);
+	if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
+	{
+		SQLExecDirect(hStmt, query, SQL_NTS);
+		SQLNumResultCols(hStmt, &colCnt);
 
-			SQLCHAR **data;
-			data = (SQLCHAR **)malloc(sizeof(SQLCHAR *)*colCnt);
+		SQLCHAR **data;
+		data = (SQLCHAR **)malloc(sizeof(SQLCHAR *)*colCnt);
+		for (i = 0; i < colCnt; i++)
+			data[i] = (SQLCHAR *)malloc(sizeof(SQLCHAR) * BUFF_SIZE);
+
+		for (i = 0; i < colCnt; i++)
+			SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, NULL);
+		printf("-----------------------------------------------------------\n");
+		while (SQLFetch(hStmt) != SQL_NO_DATA) {
 			for (i = 0; i < colCnt; i++)
-				data[i] = (SQLCHAR *)malloc(sizeof(SQLCHAR) * BUFF_SIZE);
-
-			for (i = 0; i < colCnt; i++)
-				SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, NULL);
-			printf("-----------------------------------------------------------\n");
-			while (SQLFetch(hStmt) != SQL_NO_DATA) {
-				for (i = 0; i < colCnt; i++)
-					printf("%s\t", data[i]);
-				printf("\n");
-			}
-			printf("-----------------------------------------------------------\n\n");
-
-			SQLCloseCursor(hStmt);
-			SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+				printf("%s\t", data[i]);
+			printf("\n");
 		}
+		printf("-----------------------------------------------------------\n\n");
+
+		SQLCloseCursor(hStmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+	}
+}
+
+//--------------------------------시나리오 기반의 select 메뉴 함수--------------------------------------//
+
+void selectMenu()
+{
+	int num;
+	int tmpNum;
+	char input[25];
+	static SQLCHAR query[MAX_QUERY];
+	printf("-----------------------------------------------------------\n");
+	printf("1.Refer CONSUMER\n2.Refer MANAGER\n3.Refer DELIVERER\n4.Refer PRODUCT\n5.Refer FARM\n6.CONSUMER AND INFO\n7.CONSUMER, DELIVERER, AND FARM\n");
+	printf("-----------------------------------------------------------\n");
+	printf("Select : ");
+	scanf("%d", &num);
+	getchar();
+
+	switch (num) {
+	case 1: printf("Input the Consumer ID : ");
+		scanf("%s", input);
+		sprintf((char*)query, "SELECT * FROM CONSUMER WHERE ID = '%s'", input);
+		printf("--------------------------------------------------------\nID\t\tDELIVERNO  SELLERNO    ADDR\n");
+		selectOutput(query);
+		break;
+	case 2: printf("Input the Manager No : ");
+		scanf("%s", input);
+		sprintf((char*)query, "SELECT * FROM MANAGER WHERE MNGNO = '%s'", input);
+		printf("--------------------------------------------------------\nMNGNO\tNICK\t\tWORKTIME\n");
+		selectOutput(query);
+		break;
+	case 3: printf("Input the Deliverer No : ");
+		scanf("%s", input);
+		sprintf((char*)query, "SELECT * FROM DELIVERER WHERE DELNO = '%s'", input);
+		printf("--------------------------------------------------------\nDELNO\tNAME\t\t\tCOMPANY\t\tFARMNO\n");
+		selectOutput(query);
+		break;
+	case 4: printf("Input the Product Type No : ");
+		scanf("%s", input);
+		sprintf((char*)query, "SELECT * FROM PRODUCT WHERE TYPENO = '%s'", input);
+		printf("--------------------------------------------------------\nTYPENO\tFANO\tPRICE$\n");
+		selectOutput(query); 
+		break;
+	case 5: printf("Input the Farm No : ");
+		scanf("%s", input);
+		sprintf((char*)query, "SELECT * FROM FARM WHERE FARMNO = '%s'", input);
+		printf("--------------------------------------------------------\nFARMNO\tNAME\n");
+		selectOutput(query); 
+		break;
+	case 6:	printf("\n1.CONSUMER ID\n2.PRODUCT NO\n\n");
+		printf("Select >> ");
+		scanf("%d", &tmpNum);
+		getchar();
+		if (tmpNum == 1) {
+			printf("Input the Consumer ID : ");
+			scanf("%s", input);
+			sprintf((char*)query, "SELECT DISTINCT ID, PDTNO FROM CONSUMER, INFO WHERE ID = '%s' AND SELLERNO = MNO;", input);
+			printf("\nID\t\t\tPDTNO\n--------------------------------------\n");
+			selectOutput(query);
+		}
+		else	if (tmpNum == 2) {
+			printf("Input the Product No : ");
+			scanf("%s", input);
+			sprintf((char*)query, "SELECT ID, PDTNO FROM CONSUMER, INFO WHERE PDTNO = '%s' AND SELLERNO = MNO;", input);
+			printf("\nID\t\t\tPDTNO\n--------------------------------------\n");
+			selectOutput(query);
+		}
+		else
+			printf("\n# Wrong Selection ! #\n\n");
+		break;
+	case 7:	printf("\n1.CONSUMER's DELIVERNO\n2.FARM NAME\n\n");
+		printf("Select >> ");
+		scanf("%d", &tmpNum);
+		getchar();
+		if (tmpNum == 1) {
+			printf("Input the Deliver No : ");
+			scanf("%s", input);
+			sprintf((char*)query, "SELECT DISTINCT C.ADDR, D.DELNO, F.NAME FROM CONSUMER C, DELIVERER D, FARM F WHERE DELIVERNO = %s AND DELIVERNO = DELNO AND D.FARMNO = F.FARMNO;",input);
+			printf("\nADDR\t\t\t\tDELNO\tNAME\n----------------------------------------------\n");
+			selectOutput(query);
+		}
+		else if (tmpNum == 2) {
+			printf("Input the Farm Name : ");
+			scanf("%s", input);
+			sprintf((char*)query, "SELECT DISTINCT C.ADDR, D.DELNO, F.NAME FROM CONSUMER C, DELIVERER D, FARM F WHERE DELIVERNO = DELNO AND F.FARMNO = (SELECT FARMNO FROM FARM WHERE NAME = '%s') AND D.FARMNO = F.FARMNO;", input);
+			printf("\nADDR\t\t\t\tDELNO\tNAME\n----------------------------------------------\n");
+			selectOutput(query);
+		}
+		break;
+	}
+}
+
+//----------------------------------SQL 기반의 select 메뉴 함수------------------------------------//
+
+void selectMenuSql() 
+{
+	int len;
+	static SQLCHAR query[MAX_QUERY];
+	printf("-----------------------------------------------------------\n");
+	printf("1.CONSUMER\n2.MANAGER\n3.DELIVERER\n4.PRODUCT\n5.FARM\n6.CONSUMER AND INFO\n7.CONSUMER, DELIVERER, AND FARM\n");
+	printf("-----------------------------------------------------------\n");
+	getchar();
+
+	printf("\nInput the SQL query >> ");
+	getQuery(query);
+	selectOutput(query);
+}
+
+//----------------------------------SQL select 질의에 대한 테이블 출력해주는 함수-------------------------------//
+
+void selectOutput(SQLCHAR* query)
+{
+	SQLHSTMT hStmt;
+	SQLSMALLINT colCnt = 0;
+	int len;
+	int i;
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
+	{
+		SQLExecDirect(hStmt, query, SQL_NTS);
+		SQLNumResultCols(hStmt, &colCnt);
+
+		SQLCHAR **data;
+		data = (SQLCHAR **)malloc(sizeof(SQLCHAR *)*colCnt);
+		for (i = 0; i < colCnt; i++)
+			data[i] = (SQLCHAR *)malloc(sizeof(SQLCHAR) * BUFF_SIZE);
+
+		for (i = 0; i < colCnt; i++)
+			SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, NULL);
+
+		while (SQLFetch(hStmt) != SQL_NO_DATA) {
+			for (i = 0; i < colCnt; i++)
+				printf("%s\t", data[i]);
+			printf("\n");
+		}
+		printf("\n");
+		//printf("--------------------------------------------------------\n");
+		SQLCloseCursor(hStmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+	}
+}
+
+//---------------------------------//
+
+void queryOutput(SQLCHAR* query)	// insert, update, delete
+{
+	SQLHSTMT hStmt;
+	SQLSMALLINT colCnt = 0;
+	int len;
+	int i;
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
+	{
+		SQLExecDirect(hStmt, query, SQL_NTS);
+		SQLNumResultCols(hStmt, &colCnt);
+
+		SQLCloseCursor(hStmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+	}
 }
 
 void insertSenario()
@@ -282,21 +363,46 @@ void insertSenario()
 	int choice;
 	char tupleStr[6][BUFF_SIZE];	// 삽입할 튜플의 값들
 	int tupleInt[3];
+	int i;
 	SQLCHAR query[MAX_QUERY];
 
-	printf("1.a\n2.b\n3.c\n4.d\n5.e\nSelect : ");
+	printf("1.MANAGER\n2.DELIVERER\n3.CONSUMER\n4.FARM and PRODUCT\n5.\n\nSelect >> ");
 	scanf("%d", &choice);
 	getchar();
 
 	switch (choice) {
-	case 1:
-		scanf("%s", tupleStr[0]);
-		sprintf((char*)query, "INSERT INTO %s VALUES ();", tupleStr[0]);
+	case 1:printf("Input MNGNO, NICK, and WORKTIME >> ");
+		for (i = 0; i < 3; i++) {
+		scanf("%s", tupleStr[i]);
+		getchar();
+		}
+		sprintf((char*)query, "INSERT INTO MANAGER VALUES (%s, '%s', %s);", tupleStr[0],tupleStr[1], tupleStr[2]);
 		queryOutput(query);
 		break;
-	case 2:break;
-	case 3:break;
-	case 4:break;
+	case 2:printf("Input DELNO, NAME, COMPANY, and FARMNO >> ");
+		for (i = 0; i < 4; i++) {
+		scanf("%s", tupleStr[i]);
+		getchar();
+		}
+		sprintf((char*)query, "INSERT INTO CONSUMER VALUES (%s,'%s','%s',%s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[3]);
+		queryOutput(query);
+		break;
+	case 3:printf("Input ID and ADDR >> ");;
+		for (i = 0; i < 2; i++) {
+		scanf("%s", tupleStr[i]);
+		getchar();
+		}
+		sprintf((char*)query, "INSERT INTO CONSUMER VALUES ('%s', NULL, NULL, '%s');",tupleStr[0],tupleStr[1]);
+		queryOutput(query);
+		break;
+	case 4:printf("Input FARMNO, NAME, TYPENO, and PRICE >> ");
+		for (i = 0; i < 4; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "INSERT INTO FARM VALUES(%s, '%s'); INSERT INTO PRODUCT VALUES (%s, %s, %s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[0], tupleStr[3]);
+		queryOutput(query);
+		break;
 	case 5:break;
 	}
 }
@@ -332,10 +438,3 @@ void updateSenario()
 	}
 }
 
-void getQuery(SQLCHAR *query)
-{
-	int len;
-	fgets((char*)query, MAX_QUERY + 1, stdin);
-	len = strlen((char*)query);
-	query[len - 1] = '\0';
-}
