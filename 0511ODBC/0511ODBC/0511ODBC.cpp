@@ -97,23 +97,25 @@ void menu()
 			break;
 		case 4:
 			if (qOrs() == 1) {
-				printf("\n1.CONSUMER\n2.MANAGER\n3.DELIVERER\n4.\n5.\nInput the Query >> ");
+				printf("\n1.CONSUMER (ID,DELIVERNO,SELLERNO,ADDR)\n2.MANAGER (MNGNO,NICK,WORKTIME)\n3.DELIVERER (DELNO,NAME,COMPANY,FARMNO)\n");
+				printf("4.PRODUCT (TYPENO,FANO,PRICE$)\n5.FARM (FARMNO,NAME)\n6.INFO (MNO,FANO,ADDR,PDTTYPE)\n\nInput the SQL >> ");
 				getchar();
 				getQuery(query);
 				queryOutput(query);
 			}
-			else {
+			else 
 				updateSenario();
-			}
 			break;
 		case 5:
 			if (qOrs() == 1) {
-				printf("\n1.test\n2.test\n3.test\nInput the Query : ");
+				printf("\n1.CONSUMER (ID,DELIVERNO,SELLERNO,ADDR)\n2.MANAGER (MNGNO,NICK,WORKTIME)\n3.DELIVERER (DELNO,NAME,COMPANY,FARMNO)\n");
+				printf("4.PRODUCT (TYPENO,FANO,PRICE$)\n5.FARM (FARMNO,NAME)\n6.INFO (MNO,FANO,ADDR,PDTTYPE)\n\nInput the SQL >> ");
 				getchar();
 				getQuery(query);
 				queryOutput(query);
 			}
-			else {}
+			else
+				deleteSenario();
 			break;
 		case 6: printf("\n<Exit the Database>\n\n");  break;
 		}
