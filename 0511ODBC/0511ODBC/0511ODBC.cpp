@@ -102,7 +102,9 @@ void menu()
 				getQuery(query);
 				queryOutput(query);
 			}
-			else {}
+			else {
+				updateSenario();
+			}
 			break;
 		case 5:
 			if (qOrs() == 1) {
@@ -410,15 +412,42 @@ void insertSenario()
 void deleteSenario()
 {
 	int choice;
-	printf("1.a\n2.b\n3.c\n4.d\n5.e\nSelect : ");
+	char tupleStr[6][BUFF_SIZE];	// »ðÀÔÇÒ Æ©ÇÃÀÇ °ªµé
+	int tupleInt[3];
+	int i;
+	SQLCHAR query[MAX_QUERY];
+
+	printf("1.PRODUCT\n2.DELIVERER\n3.CONSUMER and INFO\n4.INFO and MANAGER\n5.INFO with FARM and PRODUCT\nSelect >> ");
 	scanf("%d", &choice);
 	getchar();
 
 	switch (choice) {
-	case 1:break;
-	case 2:break;
-	case 3:break;
-	case 4:break;
+	case 1:printf("Input TYPENO and FANO >> ");
+		for (i = 0; i < 2; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "DELETE FROM PRODUCT WHERE TYPENO = %s AND FANO = %s", tupleStr[0], tupleStr[1]);
+		queryOutput(query);
+		break;
+	case 2:printf("Input DELNO >> ");
+		scanf("%s", tupleStr[0]);
+		getchar();
+		sprintf((char*)query, "DELETE FROM DELIVERER WHERE DELNO = %s", tupleStr[0]);
+		queryOutput(query);
+		break;
+	case 3:printf("Input ID >> ");
+		scanf("%s", tupleStr[0]);
+		getchar();
+		sprintf((char*)query, "DELETE FROM INFO WHERE MNO = (SELECT SELLERNO FROM CONSUMER WHERE ID = '%s') AND ADDR = (SELECT ADDR FROM CONSUMER WHERE ID = '%s') DELETE FROM CONSUMER WHERE ID = '%s'",tupleStr[0], tupleStr[0],tupleStr[0]);
+		queryOutput(query);
+		break;
+	case 4:printf("Input MNGNO >> ");
+		scanf("%s", tupleStr[0]);
+		getchar();
+		sprintf((char*)query, "DELETE FROM INFO WHERE MNO = %s DELETE FROM MANAGER WHERE MNGNO = %s", tupleStr[0], tupleStr[0]);
+		queryOutput(query);
+		break;
 	case 5:break;
 	}
 }
@@ -426,15 +455,57 @@ void deleteSenario()
 void updateSenario()
 {
 	int choice;
-	printf("1.a\n2.b\n3.c\n4.d\n5.e\nSelect : ");
+	char tupleStr[6][BUFF_SIZE];	// »ðÀÔÇÒ Æ©ÇÃÀÇ °ªµé
+	int tupleInt[3];
+	int i,len;
+	SQLCHAR query[MAX_QUERY];
+	
+	printf("1.DELIVERER\n2.FARM\n3.MANAGER\n4.PRODUCT\n5.CONSUMER and INFO\nSelect >> ");
 	scanf("%d", &choice);
+	getchar();
 
 	switch (choice) {
-	case 1:break;
-	case 2: break;
-	case 3:break;
-	case 4:break;
-	case 5: break;
+	case 1:printf("Input DELNO and COMPANY >> ");
+		for (i = 0; i < 2; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "UPDATE DELIVERER SET COMPANY = '%s' WHERE DELNO = %s", tupleStr[1], tupleStr[0]);
+		queryOutput(query);
+		break;
+	case 2: printf("Input FARMNO and NAME >> ");
+		for (i = 0; i < 2; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "UPDATE FARM SET NAME = '%s' WHERE FARMNO = %s", tupleStr[1], tupleStr[0]);
+		queryOutput(query);
+		break;
+	case 3:printf("Input MNGNO and WORKTIME >> ");
+		for (i = 0; i < 2; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "UPDATE MANAGER SET WORKTIME = '%s' WHERE MNGNO = %s", tupleStr[1], tupleStr[0]);
+		queryOutput(query);
+		break;
+	case 4:printf("Input TYPENO, FANO, and PRICE >> ");
+		for (i = 0; i < 3; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "UPDATE PRODUCT SET PRICE = %s WHERE TYPENO = %s AND FANO = %s", tupleStr[2], tupleStr[0], tupleStr[1]);
+		queryOutput(query);
+		break;
+	case 5: printf("Input ID and ADDR >> ");
+		scanf("%s", tupleStr[0]);
+		getchar();
+		fgets(tupleStr[1], BUFF_SIZE, stdin);
+		len = strlen(tupleStr[1]);
+		tupleStr[1][len - 1] = '\0';
+		sprintf((char*)query, "UPDATE INFO SET ADDR = '%s' WHERE MNO = (SELECT SELLERNO FROM CONSUMER WHERE ID = '%s') AND ADDR = (SELECT ADDR FROM CONSUMER WHERE ID = '%s') UPDATE CONSUMER SET ADDR = '%s' WHERE ID = '%s'", tupleStr[1], tupleStr[0], tupleStr[0], tupleStr[1], tupleStr[0]);
+		queryOutput(query);
+		break;
 	}
 }
 
