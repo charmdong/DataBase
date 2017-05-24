@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #define BUFF_SIZE 30
-#define MAX_QUERY 300
+#define MAX_QUERY 500
 #pragma warning(disable : 4996)
 
 bool DBConnect();
@@ -17,9 +17,9 @@ void selectOutput(SQLCHAR *);
 void queryOutput(SQLCHAR *);
 void schemaMenu();
 void showSchema(SQLCHAR *);
-void insertSenario();
-void updateSenario();
-void deleteSenario();
+void insertScenario();
+void updateScenario();
+void deleteScenario();
 int qOrs();
 void getQuery(SQLCHAR *);
 
@@ -74,7 +74,7 @@ void menu()
 	SQLCHAR query[MAX_QUERY];
 	while (1) {
 		printf("\t<MENU>\n1.Show Schema\n2.SELECT\n3.INSERT\n4.UPDATE\n5.DELETE\n6.EXIT\n");
-		printf("Select : ");
+		printf("Select >> ");
 		scanf("%d", &menuNum);
 
 		switch (menuNum) {
@@ -93,7 +93,7 @@ void menu()
 				queryOutput(query);
 			}
 			else
-				insertSenario();
+				insertScenario();
 			break;
 		case 4:
 			if (qOrs() == 1) {
@@ -104,7 +104,7 @@ void menu()
 				queryOutput(query);
 			}
 			else 
-				updateSenario();
+				updateScenario();
 			break;
 		case 5:
 			if (qOrs() == 1) {
@@ -115,7 +115,7 @@ void menu()
 				queryOutput(query);
 			}
 			else
-				deleteSenario();
+				deleteScenario();
 			break;
 		case 6: printf("\n<Exit the Database>\n\n");  break;
 		default: printf("\n# Wrong Selection ! #\n\n");
@@ -131,8 +131,8 @@ int qOrs()
 {
 	int num;
 	while (1) {
-		printf("\n1.By SQL\n2.By Senario\n\n");
-		printf("Select : ");
+		printf("+---------------------------------------+\n|\t\t1.By SQL\t\t|\n|\t\t2.By Scenario\t\t|\n+---------------------------------------+\n");
+		printf("Select >> ");
 		scanf("%d", &num);
 		if (num == 1 || num == 2)
 			break;
@@ -177,6 +177,7 @@ void showSchema(SQLCHAR *query) // 모든 스키마를 출력해주는 함수
 {
 	SQLHSTMT hStmt;
 	SQLSMALLINT colCnt = 0;
+	SQLINTEGER nullData[50];
 	int len;
 	int i;
 
@@ -191,11 +192,15 @@ void showSchema(SQLCHAR *query) // 모든 스키마를 출력해주는 함수
 			data[i] = (SQLCHAR *)malloc(sizeof(SQLCHAR) * BUFF_SIZE);
 
 		for (i = 0; i < colCnt; i++)
-			SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, NULL);
+			SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, &nullData[i]);
 		printf("-----------------------------------------------------------\n");
 		while (SQLFetch(hStmt) != SQL_NO_DATA) {
-			for (i = 0; i < colCnt; i++)
-				printf("%s\t", data[i]);
+			for (i = 0; i < colCnt; i++) {
+				if (nullData[i] == SQL_NULL_DATA)
+					printf("NULL\t");
+				else
+					printf("%s\t", data[i]);
+			}
 			printf("\n");
 		}
 		printf("-----------------------------------------------------------\n\n");
@@ -213,10 +218,11 @@ void selectMenu()
 	int tmpNum;
 	char input[25];
 	static SQLCHAR query[MAX_QUERY];
-	printf("-----------------------------------------------------------\n");
-	printf("1.Refer CONSUMER\n2.Refer MANAGER\n3.Refer DELIVERER\n4.Refer PRODUCT\n5.Refer FARM\n6.CONSUMER AND INFO\n7.CONSUMER, DELIVERER, AND FARM\n");
-	printf("-----------------------------------------------------------\n");
-	printf("Select : ");
+	
+	printf("+-------------------------------------------------------+\n");
+	printf("|\t\t1.Refer CONSUMER\t\t\t|\n|\t\t2.Refer MANAGER\t\t\t\t|\n|\t\t3.Refer DELIVERER\t\t\t|\n|\t\t4.Refer PRODUCT\t\t\t\t|\n|\t\t5.Refer FARM\t\t\t\t|\n|\t\t6.CONSUMER AND INFO\t\t\t|\n|\t\t7.CONSUMER, DELIVERER, AND FARM\t\t|\n");
+	printf("+-------------------------------------------------------+\n");
+	printf("Select >> ");
 	scanf("%d", &num);
 	getchar();
 
@@ -317,12 +323,18 @@ void selectOutput(SQLCHAR* query)
 {
 	SQLHSTMT hStmt;
 	SQLSMALLINT colCnt = 0;
+	SQLRETURN retcode;
+	SQLINTEGER nullData[50];
 	int len;
 	int i;
 
 	if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
 	{
-		SQLExecDirect(hStmt, query, SQL_NTS);
+		retcode = SQLExecDirect(hStmt, query, SQL_NTS);
+		if (retcode == SQL_ERROR || retcode == SQL_NO_DATA_FOUND) {
+			printf("\n# Query Execute Error #\n\n");
+			return;
+		}
 		SQLNumResultCols(hStmt, &colCnt);
 
 		SQLCHAR **data;
@@ -331,15 +343,18 @@ void selectOutput(SQLCHAR* query)
 			data[i] = (SQLCHAR *)malloc(sizeof(SQLCHAR) * BUFF_SIZE);
 
 		for (i = 0; i < colCnt; i++)
-			SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, NULL);
+			SQLBindCol(hStmt, i + 1, SQL_C_CHAR, data[i], BUFF_SIZE, &nullData[i]);
 
 		while (SQLFetch(hStmt) != SQL_NO_DATA) {
-			for (i = 0; i < colCnt; i++)
-				printf("%s\t", data[i]);
+			for (i = 0; i < colCnt; i++) {
+				if (nullData[i] == SQL_NULL_DATA)
+					printf("NULL\t");
+				else
+					printf("%s\t", data[i]);
+			}
 			printf("\n");
 		}
 		printf("\n");
-		//printf("--------------------------------------------------------\n");
 		SQLCloseCursor(hStmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
 	}
@@ -351,12 +366,17 @@ void queryOutput(SQLCHAR* query)	// insert, update, delete
 {
 	SQLHSTMT hStmt;
 	SQLSMALLINT colCnt = 0;
+	SQLRETURN retcode;
 	int len;
 	int i;
 
 	if (SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &hStmt) == SQL_SUCCESS)
 	{
-		SQLExecDirect(hStmt, query, SQL_NTS);
+		retcode = SQLExecDirect(hStmt, query, SQL_NTS);
+		if (retcode == SQL_ERROR || retcode == SQL_NO_DATA_FOUND) {
+			printf("\n# Query Execute Error #\n\n");
+			return;
+		}
 		SQLNumResultCols(hStmt, &colCnt);
 
 		SQLCloseCursor(hStmt);
@@ -364,15 +384,15 @@ void queryOutput(SQLCHAR* query)	// insert, update, delete
 	}
 }
 
-void insertSenario()
+void insertScenario()
 {
 	int choice;
 	char tupleStr[6][BUFF_SIZE];	// 삽입할 튜플의 값들
 	int tupleInt[3];
-	int i;
+	int i,len;
 	SQLCHAR query[MAX_QUERY];
 
-	printf("1.MANAGER\n2.DELIVERER\n3.CONSUMER\n4.FARM and PRODUCT\n5.\n\nSelect >> ");
+	printf("1.MANAGER\n2.DELIVERER\n3.CONSUMER(ID, ADDR)\n4.FARM\n5.INFO(MNO, FANO, ADDR) with CONSUMER and FARM\n\nSelect >> ");
 	scanf("%d", &choice);
 	getchar();
 
@@ -382,7 +402,7 @@ void insertSenario()
 		scanf("%s", tupleStr[i]);
 		getchar();
 		}
-		sprintf((char*)query, "INSERT INTO MANAGER VALUES (%s, '%s', %s);", tupleStr[0],tupleStr[1], tupleStr[2]);
+		sprintf((char*)query, "INSERT INTO MANAGER VALUES (%s, '%s', '%s');", tupleStr[0],tupleStr[1], tupleStr[2]);
 		queryOutput(query);
 		break;
 	case 2:printf("Input DELNO, NAME, COMPANY, and FARMNO >> ");
@@ -390,33 +410,40 @@ void insertSenario()
 		scanf("%s", tupleStr[i]);
 		getchar();
 		}
-		sprintf((char*)query, "INSERT INTO CONSUMER VALUES (%s,'%s','%s',%s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[3]);
+		sprintf((char*)query, "INSERT INTO DELIVERER VALUES (%s,'%s','%s',%s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[3]);
 		queryOutput(query);
 		break;
 	case 3:printf("Input ID and ADDR >> ");
-		for (i = 0; i < 2; i++) {
-		scanf("%s", tupleStr[i]);
+		scanf("%s", tupleStr[0]);
 		getchar();
-		}
+		fgets(tupleStr[1], BUFF_SIZE, stdin);
+		len = strlen(tupleStr[1]);
+		tupleStr[1][len - 1] = '\0';
 		sprintf((char*)query, "INSERT INTO CONSUMER VALUES ('%s', NULL, NULL, '%s');",tupleStr[0],tupleStr[1]);
 		queryOutput(query);
 		break;
-	case 4:printf("Input FARMNO, NAME, TYPENO, and PRICE >> ");
-		for (i = 0; i < 4; i++) {
+	case 4:printf("Input FARMNO and NAME >> ");
+		for (i = 0; i < 2; i++) {
 			scanf("%s", tupleStr[i]);
 			getchar();
 		}
-		sprintf((char*)query, "INSERT INTO FARM VALUES(%s, '%s'); INSERT INTO PRODUCT VALUES (%s, %s, %s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[0], tupleStr[3]);
+		sprintf((char*)query, "INSERT INTO FARM VALUES(%s , '%s');",tupleStr[0], tupleStr[1]);
 		queryOutput(query);
 		break;
-	case 5:printf("Input ID, FARMNAME, and TYPENO >> ");
-
+	case 5:printf("Input ID and FARMNAME >> ");
+		for (i = 0; i < 2; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "INSERT INTO INFO (MNO, FANO, ADDR) SELECT MNGNO, FARMNO, ADDR FROM MANAGER, FARM, CONSUMER WHERE MNGNO = (SELECT SELLERNO FROM CONSUMER WHERE ID = '%s') AND FARMNO = (SELECT FARMNO FROM FARM WHERE NAME = '%s') AND ID = '%s'", tupleStr[0], tupleStr[1],tupleStr[0]);
+		queryOutput(query);
 		break;
 	default: printf("\n# Wrong Selection ! #\n\n");
 	}
+	printf("\n");
 }
 
-void deleteSenario()
+void deleteScenario()
 {
 	int choice;
 	char tupleStr[6][BUFF_SIZE];	// 삽입할 튜플의 값들
@@ -424,17 +451,15 @@ void deleteSenario()
 	int i;
 	SQLCHAR query[MAX_QUERY];
 
-	printf("1.PRODUCT\n2.DELIVERER\n3.CONSUMER and INFO\n4.INFO and MANAGER\n5.PRODUCT and FARM\nSelect >> ");
+	printf("1.FARM\n2.DELIVERER\n3.CONSUMER and INFO\n4.MANAGER and INFO\n5.PRODUCT and FARM\nSelect >> ");
 	scanf("%d", &choice);
 	getchar();
 
 	switch (choice) {
-	case 1:printf("Input TYPENO and FANO >> ");
-		for (i = 0; i < 2; i++) {
-			scanf("%s", tupleStr[i]);
-			getchar();
-		}
-		sprintf((char*)query, "DELETE FROM PRODUCT WHERE TYPENO = %s AND FANO = %s", tupleStr[0], tupleStr[1]);
+	case 1:printf("Input FARMNO >> ");
+		scanf("%s", tupleStr[0]);
+		getchar();
+		sprintf((char*)query, "DELETE FROM FARM WHERE FARMNO = %s ", tupleStr[0]);
 		queryOutput(query);
 		break;
 	case 2:printf("Input DELNO >> ");
@@ -465,9 +490,10 @@ void deleteSenario()
 		break;
 	default: printf("\n# Wrong Selection ! #\n\n");
 	}
+	printf("\n");
 }
 
-void updateSenario()
+void updateScenario()
 {
 	int choice;
 	char tupleStr[6][BUFF_SIZE];	// 삽입할 튜플의 값들
@@ -475,7 +501,7 @@ void updateSenario()
 	int i,len;
 	SQLCHAR query[MAX_QUERY];
 	
-	printf("1.DELIVERER\n2.FARM\n3.MANAGER\n4.PRODUCT\n5.CONSUMER and INFO\nSelect >> ");
+	printf("1.DELIVERER\n2.INFO\n3.MANAGER\n4.PRODUCT\n5.CONSUMER and INFO\n6.SELLERNO and DELIVERNO\nSelect >> ");
 	scanf("%d", &choice);
 	getchar();
 
@@ -488,12 +514,12 @@ void updateSenario()
 		sprintf((char*)query, "UPDATE DELIVERER SET COMPANY = '%s' WHERE DELNO = %s", tupleStr[1], tupleStr[0]);
 		queryOutput(query);
 		break;
-	case 2: printf("Input FARMNO and NAME >> ");
+	case 2: printf("Input ID and TYPENO >> ");
 		for (i = 0; i < 2; i++) {
 			scanf("%s", tupleStr[i]);
 			getchar();
 		}
-		sprintf((char*)query, "UPDATE FARM SET NAME = '%s' WHERE FARMNO = %s", tupleStr[1], tupleStr[0]);
+		sprintf((char*)query, "UPDATE INFO SET PDTNO = %s WHERE MNO = (SELECT SELLERNO FROM CONSUMER WHERE ID = '%s') AND ADDR = (SELECT ADDR FROM CONSUMER WHERE ID = '%s')", tupleStr[1], tupleStr[0]);
 		queryOutput(query);
 		break;
 	case 3:printf("Input MNGNO and WORKTIME >> ");
@@ -521,7 +547,16 @@ void updateSenario()
 		sprintf((char*)query, "UPDATE INFO SET ADDR = '%s' WHERE MNO = (SELECT SELLERNO FROM CONSUMER WHERE ID = '%s') AND ADDR = (SELECT ADDR FROM CONSUMER WHERE ID = '%s') UPDATE CONSUMER SET ADDR = '%s' WHERE ID = '%s'", tupleStr[1], tupleStr[0], tupleStr[0], tupleStr[1], tupleStr[0]);
 		queryOutput(query);
 		break;
+	case 6:printf("Input ID, SELLERNO, and DELIVERNO >> ");
+		for (i = 0; i < 3; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "UPDATE CONSUMER SET SELLERNO = %s, DELIVERNO = %s WHERE ID = '%s'", tupleStr[1], tupleStr[2], tupleStr[0]);
+		queryOutput(query);
+		break;
 	default: printf("\n# Wrong Selection ! #\n\n");
 	}
+	printf("\n");
 }
 
