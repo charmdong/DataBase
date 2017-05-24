@@ -29,7 +29,7 @@ SQLHDBC hDbc = NULL;
 int main(int argc, char *agrv[])
 {
 	if (DBConnect() == true) {
-		printf("\n\tDatabase is connected !\n\n");
+		printf("+---------------------------------------+\n|\tDatabase is connected !\t\t|\n+---------------------------------------+\n");
 		menu();
 		DBDisconnect();
 	}
@@ -118,6 +118,7 @@ void menu()
 				deleteSenario();
 			break;
 		case 6: printf("\n<Exit the Database>\n\n");  break;
+		default: printf("\n# Wrong Selection ! #\n\n");
 		}
 		if (menuNum == 6)
 			break;
@@ -290,6 +291,7 @@ void selectMenu()
 			selectOutput(query);
 		}
 		break;
+	default: printf("\n# Wrong Selection ! #\n\n");
 	}
 }
 
@@ -391,7 +393,7 @@ void insertSenario()
 		sprintf((char*)query, "INSERT INTO CONSUMER VALUES (%s,'%s','%s',%s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[3]);
 		queryOutput(query);
 		break;
-	case 3:printf("Input ID and ADDR >> ");;
+	case 3:printf("Input ID and ADDR >> ");
 		for (i = 0; i < 2; i++) {
 		scanf("%s", tupleStr[i]);
 		getchar();
@@ -407,7 +409,10 @@ void insertSenario()
 		sprintf((char*)query, "INSERT INTO FARM VALUES(%s, '%s'); INSERT INTO PRODUCT VALUES (%s, %s, %s);", tupleStr[0], tupleStr[1], tupleStr[2], tupleStr[0], tupleStr[3]);
 		queryOutput(query);
 		break;
-	case 5:break;
+	case 5:printf("Input ID, FARMNAME, and TYPENO >> ");
+
+		break;
+	default: printf("\n# Wrong Selection ! #\n\n");
 	}
 }
 
@@ -419,7 +424,7 @@ void deleteSenario()
 	int i;
 	SQLCHAR query[MAX_QUERY];
 
-	printf("1.PRODUCT\n2.DELIVERER\n3.CONSUMER and INFO\n4.INFO and MANAGER\n5.INFO with FARM and PRODUCT\nSelect >> ");
+	printf("1.PRODUCT\n2.DELIVERER\n3.CONSUMER and INFO\n4.INFO and MANAGER\n5.PRODUCT and FARM\nSelect >> ");
 	scanf("%d", &choice);
 	getchar();
 
@@ -450,7 +455,15 @@ void deleteSenario()
 		sprintf((char*)query, "DELETE FROM INFO WHERE MNO = %s DELETE FROM MANAGER WHERE MNGNO = %s", tupleStr[0], tupleStr[0]);
 		queryOutput(query);
 		break;
-	case 5:break;
+	case 5:printf("Input NAME and TYPENO >> ");
+		for (i = 0; i < 2; i++) {
+			scanf("%s", tupleStr[i]);
+			getchar();
+		}
+		sprintf((char*)query, "DELETE FROM PRODUCT WHERE FANO = (SELECT FARMNO FROM FARM WHERE NAME = '%s') AND TYPENO = %s", tupleStr[0], tupleStr[1]);
+		queryOutput(query);
+		break;
+	default: printf("\n# Wrong Selection ! #\n\n");
 	}
 }
 
@@ -491,12 +504,12 @@ void updateSenario()
 		sprintf((char*)query, "UPDATE MANAGER SET WORKTIME = '%s' WHERE MNGNO = %s", tupleStr[1], tupleStr[0]);
 		queryOutput(query);
 		break;
-	case 4:printf("Input TYPENO, FANO, and PRICE >> ");
+	case 4:printf("Input TYPENO, FARMNAME, and PRICE >> ");
 		for (i = 0; i < 3; i++) {
 			scanf("%s", tupleStr[i]);
 			getchar();
 		}
-		sprintf((char*)query, "UPDATE PRODUCT SET PRICE = %s WHERE TYPENO = %s AND FANO = %s", tupleStr[2], tupleStr[0], tupleStr[1]);
+		sprintf((char*)query, "UPDATE PRODUCT SET PRICE = %s WHERE TYPENO = %s AND FANO = (SELECT FARMNO FROM FARM WHERE NAME = '%s') ", tupleStr[2], tupleStr[0], tupleStr[1]);
 		queryOutput(query);
 		break;
 	case 5: printf("Input ID and ADDR >> ");
@@ -508,6 +521,7 @@ void updateSenario()
 		sprintf((char*)query, "UPDATE INFO SET ADDR = '%s' WHERE MNO = (SELECT SELLERNO FROM CONSUMER WHERE ID = '%s') AND ADDR = (SELECT ADDR FROM CONSUMER WHERE ID = '%s') UPDATE CONSUMER SET ADDR = '%s' WHERE ID = '%s'", tupleStr[1], tupleStr[0], tupleStr[0], tupleStr[1], tupleStr[0]);
 		queryOutput(query);
 		break;
+	default: printf("\n# Wrong Selection ! #\n\n");
 	}
 }
 
