@@ -73,7 +73,7 @@ void menu()
 	int menuNum;
 	SQLCHAR query[MAX_QUERY];
 	while (1) {
-		printf("\t<MENU>\n1.Show Schema\n2.SELECT\n3.INSERT\n4.UPDATE\n5.DELETE\n6.EXIT\n");
+		printf("+----------------<MENU>-----------------+\n|\t\t1.Show Schema\t\t|\n|\t\t2.SELECT\t\t|\n|\t\t3.INSERT\t\t|\n|\t\t4.UPDATE\t\t|\n|\t\t5.DELETE\t\t|\n|\t\t6.EXIT\t\t\t|\n+---------------------------------------+\n");
 		printf("Select >> ");
 		scanf("%d", &menuNum);
 
@@ -86,8 +86,8 @@ void menu()
 				selectMenu(); break;
 		case 3:
 			if (qOrs() == 1) {
-				printf("\n1.CONSUMER (ID,DELIVERNO,SELLERNO,ADDR)\n2.MANAGER (MNGNO,NICK,WORKTIME)\n3.DELIVERER (DELNO,NAME,COMPANY,FARMNO)\n");
-				printf("4.PRODUCT (TYPENO,FANO,PRICE$)\n5.FARM (FARMNO,NAME)\n6.INFO (MNO,FANO,ADDR,PDTTYPE)\n\nInput the SQL >> ");
+				printf("\n+---------------------------------------+\n|1.CONSUMER (ID,DELIVERNO,SELLERNO,ADDR)|\n|2.MANAGER (MNGNO,NICK,WORKTIME)\t|\n|3.DELIVERER (DELNO,NAME,COMPANY,FARMNO)|\n");
+				printf("|4.PRODUCT (TYPENO,FANO,PRICE$)\t\t|\n|5.FARM (FARMNO,NAME)\t\t\t|\n|6.INFO (MNO,FANO,ADDR,PDTTYPE)\t\t|\n+---------------------------------------+\nInput the SQL >> ");
 				getchar();
 				getQuery(query);
 				queryOutput(query);
@@ -535,7 +535,7 @@ void updateScenario()
 			scanf("%s", tupleStr[i]);
 			getchar();
 		}
-		sprintf((char*)query, "UPDATE PRODUCT SET PRICE = %s WHERE TYPENO = %s AND FANO = (SELECT FARMNO FROM FARM WHERE NAME = '%s') ", tupleStr[2], tupleStr[0], tupleStr[1]);
+		sprintf((char*)query, "UPDATE PRODUCT SET PRICE$ = %s WHERE TYPENO = %s AND FANO = (SELECT FARMNO FROM FARM WHERE NAME = '%s') ", tupleStr[2], tupleStr[0], tupleStr[1]);
 		queryOutput(query);
 		break;
 	case 5: printf("Input ID and ADDR >> ");
