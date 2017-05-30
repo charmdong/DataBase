@@ -403,7 +403,7 @@ void insertScenario()
 	SQLCHAR query[MAX_QUERY];
 
 	printf("\n+-----------------------------------------------------+");
-	printf("\n1.MANAGER\n2.DELIVERER\n3.CONSUMER(ID, ADDR)\n4.FARM\n5.INFO(MNO, FANO, ADDR) with CONSUMER and FARM\n6.INSERT NEW PRODUCT\n");
+	printf("\n1.Insert MANAGER\n2.Insert DELIVERER\n3.Insert CONSUMER(ID, ADDR)\n4.Insert FARM\n5.INFO(MNO, FANO, ADDR) with CONSUMER and FARM\n6.Insert NEW PRODUCT\n");
 	printf("+-----------------------------------------------------+\n");
 	printf("Select >> ");
 	scanf("%d", &choice);
@@ -473,7 +473,7 @@ void deleteScenario()
 	SQLCHAR query[MAX_QUERY];
 
 	printf("\n+------------------------------------+\n");
-	printf("1.FARM\n2.DELIVERER\n3.CONSUMER and INFO\n4.MANAGER and INFO\n5.PRODUCT and FARM\n");
+	printf("1.Delete FARM\n2.Delete DELIVERER\n3.Delete CONSUMER's Purchasing INFO\n4.Delete MANAGER\n5.Delete PRODUCT\n");
 	printf("+------------------------------------+\n");
 	printf("Select >> ");
 	scanf("%d", &choice);
@@ -526,7 +526,7 @@ void updateScenario()
 	SQLCHAR query[MAX_QUERY];
 	
 	printf("\n+---------------------------------------+\n");
-	printf("1.DELIVERER\n2.INFO\n3.MANAGER\n4.PRODUCT\n5.CONSUMER and INFO\n6.SELLERNO and DELIVERNO\n7.Update sellerno of consumer");
+	printf("1.Update DELIVER man's COMPANY\n2.Update CONSUMER's Purchasing INFO of PRODUCT\n3.Update MANAGER's WORKTIME\n4.Update PRODUCT's PRICE\n5.Update CONSUMER's ADDR\n6.Update CONSUMER's SELLERNO and DELIVERNO\n7.Update sellerno of consumer");
 	printf("\n+---------------------------------------+\n");
 	printf("Select >> ");
 	scanf("%d", &choice);
@@ -580,7 +580,7 @@ void updateScenario()
 			getchar();
 		}
 		sprintf((char*)query, "UPDATE CONSUMER SET SELLERNO = %s, DELIVERNO = %s WHERE ID = '%s'", tupleStr[1], tupleStr[2], tupleStr[0]);
-		queryOutput(query);
+		queryOutput(query);	
 		break;
 	case 7:printf("Input ID and SELLERNO (MNGNO) >> ");
 		for (i = 0; i < 2; i++) {
